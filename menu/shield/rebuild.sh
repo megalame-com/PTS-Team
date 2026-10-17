@@ -53,8 +53,15 @@ for ((i = 1; i < $count + 1; i++)); do
 	echo "$app" >/tmp/program_var
 	sleep 1.5
 
-	if [ -e "/opt/coreapps/apps/$app.yml" ]; then ansible-playbook /opt/coreapps/apps/$app.yml; fi
-	if [ -e "/opt/communityapps/apps/$app.yml" ]; then ansible-playbook /opt/communityapps/apps/$app.yml; fi
+	# Personal containers override the stock core/community playbooks
+	if [ -e "/opt/mycontainers/apps/$app.yml" ]; then
+		ansible-playbook /opt/mycontainers/apps/$app.yml
+	elif [ -e "/opt/coreapps/apps/$app.yml" ] || [ -e "/opt/communityapps/apps/$app.yml" ]; then
+		if [ -e "/opt/coreapps/apps/$app.yml" ]; then ansible-playbook /opt/coreapps/apps/$app.yml; fi
+		if [ -e "/opt/communityapps/apps/$app.yml" ]; then ansible-playbook /opt/communityapps/apps/$app.yml; fi
+	else
+		echo "⚠️  No playbook found for [$app] - skipped"
+	fi
 done
 
 echo ""
